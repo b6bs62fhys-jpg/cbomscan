@@ -38,3 +38,5 @@ License: MIT.
 
 ## Beispiel
 Ein signiertes Beispiel-CBOM aus dem OpenWrt-23.05.5-Image (TP-Link Archer C7 v2, `libmbedcrypto.so.2.28.9`) inklusive Verifikationsanleitung liegt unter [examples/openwrt_beispiel.md](examples/openwrt_beispiel.md).
+
+Batch evaluation of 16 OpenWrt 23.05.5 images (`scan-image`): [results/openwrt_23.05.5_summary_en.md](results/openwrt_23.05.5_summary_en.md) (German: [results/openwrt_23.05.5_auswertung.md](results/openwrt_23.05.5_auswertung.md)).
