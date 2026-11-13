@@ -35,3 +35,6 @@ Five OpenWrt 23.05.5 images (TP-Link WR841N v13, Archer C7 v2, Xiaomi Mi Router 
 
 Test: `python -m pytest` (the section header test needs Linux and gcc).
 License: MIT.
+
+## Beispiel
+Ein signiertes Beispiel-CBOM aus dem OpenWrt-23.05.5-Image (TP-Link Archer C7 v2, `libmbedcrypto.so.2.28.9`) inklusive Verifikationsanleitung liegt unter [examples/openwrt_beispiel.md](examples/openwrt_beispiel.md).
