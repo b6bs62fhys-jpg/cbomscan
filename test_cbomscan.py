@@ -44,3 +44,57 @@ def test_scan_image_dir():
     cbom = os.path.join(out, "cboms", "usr__lib__libcrypto.so.cbom.json")
     assert os.path.exists(cbom) and os.path.exists(cbom + ".sig")
     assert run("verify", cbom, "--target", elf).returncode == 0
+
+def test_strongswan_and_kernel_rules():
+    import sys as _sys
+    _sys.path.insert(0, HERE)
+    import cbomscan
+    for sym, want in [
+        ("aes_crypter_create", "AES"),
+        ("des_crypter_create", "DES"),
+        ("hmac_plugin_create", "HMAC"),
+        ("x509_cert_load", "X.509"),
+        ("libcharon_init", "IPsec/IKEv2"),
+        ("chacha_crypt_arch", "ChaCha20"),
+        ("poly1305_init_arch", "Poly1305"),
+        ("crypto_register_skciphers", "Linux-Kernel-Crypto-API"),
+        ("uclient_http_set_ssl_ctx", "TLS"),
+    ]:
+        out = []
+        cbomscan._match_sym(sym, 0, "defined", set(), out)
+        assert out and out[0][0] == want, (sym, out)
+
+def test_origin_noncrypto_kmods_and_libubox_md5():
+    import sys as _sys
+    _sys.path.insert(0, HERE)
+    import cbomscan
+    d = tempfile.mkdtemp()
+    for fn in ("crc32c_generic.ko", "crypto_null.ko"):
+        p = os.path.join(d, fn)
+        open(p, "wb").write(b"\x7fELF" + b"\x00" * 32 + b"crypto_register_shash")
+        bom = cbomscan.scan(p)
+        assert [c for c in bom["components"] if c["type"] == "cryptographic-asset"] == []
+    p_bytes = os.path.join(d, "a.bin")
+    open(p_bytes, "wb").write(bytes.fromhex("06092a864886f70d010101"))
+    b = cbomscan.scan(p_bytes)
+    assert cbomscan._prop(b["components"][0], "cbomscan:origin") == "enthält"
+    orig_needed = cbomscan.elf_needed
+    orig_syms = cbomscan.elf_symbols
+    try:
+        cbomscan.elf_needed = lambda _p: [("libssl.so.3", 0)]
+        cbomscan.elf_symbols = lambda _p: []
+        p_use = os.path.join(d, "use.elf")
+        open(p_use, "wb").write(b"\x7fELF\x00\x00\x00\x00libssl.so.3")
+        b_use = cbomscan.scan(p_use)
+        tls = [c for c in b_use["components"] if c["name"] == "TLS"][0]
+        assert cbomscan._prop(tls, "cbomscan:origin") == "nutzt"
+        cbomscan.elf_needed = lambda _p: []
+        cbomscan.elf_symbols = lambda _p: [("MD5", "MD5", "hash", False, 0, "md5_begin", "defined")]
+        p_md5 = os.path.join(d, "libubox.so")
+        open(p_md5, "wb").write(b"\x7fELF\x00\x00\x00\x00md5_begin")
+        b_md5 = cbomscan.scan(p_md5)
+        md5c = [c for c in b_md5["components"] if c["name"] == "MD5"][0]
+        assert cbomscan._prop(md5c, "cbomscan:note") == "Prüfsumme, nicht sicherheitsrelevant genutzt"
+    finally:
+        cbomscan.elf_needed = orig_needed
+        cbomscan.elf_symbols = orig_syms

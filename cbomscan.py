@@ -68,19 +68,32 @@ def find_all(data, pat, limit=50):
 
 # symbol name -> (asset, family, primitive, quantum-vulnerable)
 SYMRULES = [
-    (re.compile(r"^(mbedtls_aes_|AES_(set|encrypt|decrypt|cbc)|EVP_aes|wc_Aes|gcry_cipher_)"), "AES", "AES", "block-cipher", False),
+    (re.compile(r"^(mbedtls_aes_|AES_(set|encrypt|decrypt|cbc)|EVP_aes|wc_Aes|gcry_cipher_|aes_(crypter|plugin)_create)"), "AES", "AES", "block-cipher", False),
+    (re.compile(r"^(des_(crypter|plugin)_create|des_SPtrans)"), "DES", "DES", "block-cipher", False),
+    (re.compile(r"^(hmac_(plugin|prf|signer)_create)"), "HMAC", "HMAC", "mac", False),
+    (re.compile(r"^x509_(cert|crl|ac|ocsp)_"), "X.509", "X.509", "certificate", None),
+    (re.compile(r"^(libcharon_(init|deinit)|vici_(connect|init|deinit)|charon$)"), "IPsec/IKEv2", "IPsec", "protocol", None),
     (re.compile(r"^(mbedtls_rsa_|RSA_(new|generate|public|private|sign|verify)|wc_Rsa|EVP_PKEY_RSA)"), "RSA", "RSA", "pke", True),
     (re.compile(r"^(mbedtls_ecdsa_|mbedtls_ecdh_|ECDSA_|ECDH_|EC_KEY_|wc_ecc_)"), "ECDSA/ECDH", "EC", "pke", True),
     (re.compile(r"^(mbedtls_dhm_|DH_(new|generate|compute)|wc_Dh)"), "DH", "DH", "key-agree", True),
     (re.compile(r"(?i)(ed25519|curve25519|x25519)"), "Curve25519", "EdDSA/X25519", "pke", True),
-    (re.compile(r"^(mbedtls_chacha20|chacha20_|wc_Chacha)"), "ChaCha20", "ChaCha", "stream-cipher", False),
-    (re.compile(r"^(mbedtls_sha256|SHA256_|wc_Sha256)"), "SHA-256", "SHA-2", "hash", False),
-    (re.compile(r"^(mbedtls_sha512|SHA512_|wc_Sha512)"), "SHA-512", "SHA-2", "hash", False),
-    (re.compile(r"^(mbedtls_sha1|SHA1_|wc_Sha_)"), "SHA-1", "SHA-1", "hash", False),
-    (re.compile(r"^(mbedtls_md5|MD5_)"), "MD5", "MD5", "hash", False),
-    (re.compile(r"^(mbedtls_ssl_|SSL_(new|connect|accept|CTX_new|read|write)|wolfSSL_(connect|accept)|gnutls_(handshake|init)|tls_)"), "TLS", "TLS", "protocol", None),
+    (re.compile(r"^(mbedtls_chacha20|chacha20_|wc_Chacha|chacha_(init|crypt)_arch|hchacha_block_arch|x?chacha20poly1305_)"), "ChaCha20", "ChaCha", "stream-cipher", False),
+    (re.compile(r"^(poly1305_(init|update|final)_arch|x?chacha20poly1305_)"), "Poly1305", "Poly1305", "mac", False),
+    (re.compile(r"^(crypto_(un)?register_(skciphers|shash|ahash|aead|cipher|rng|akcipher|kpp)|crypto_has_(alg|ahash))"), "Linux-Kernel-Crypto-API", "Kernel-Crypto", "other", None),
+    (re.compile(r"^wg_"), "WireGuard", "WireGuard", "protocol", None),
+    (re.compile(r"^(mbedtls_sha256|SHA256_|wc_Sha256|sha256_)"), "SHA-256", "SHA-2", "hash", False),
+    (re.compile(r"^(mbedtls_sha512|SHA512_|wc_Sha512|sha512_)"), "SHA-512", "SHA-2", "hash", False),
+    (re.compile(r"^(mbedtls_sha1|SHA1_|wc_Sha_|sha1_)"), "SHA-1", "SHA-1", "hash", False),
+    (re.compile(r"^(mbedtls_md5|MD5_|md5_)"), "MD5", "MD5", "hash", False),
+    (re.compile(r"^(mbedtls_ssl_|SSL_(new|connect|accept|CTX_new|read|write)|wolfSSL_(connect|accept)|gnutls_(handshake|init)|tls_|uclient_http_set_ssl_ctx)"), "TLS", "TLS", "protocol", None),
     (re.compile(r"(?i)(ml_?kem|kyber|OQS_KEM)"), "ML-KEM", "ML-KEM", "kem", False),
     (re.compile(r"(?i)(ml_?dsa|dilithium|OQS_SIG)"), "ML-DSA", "ML-DSA", "signature", False),
+]
+
+NEEDED_RULES = [
+    (re.compile(r"^(libssl|libmbedtls|libwolfssl|libgnutls|libustream-ssl)"), "TLS", "TLS", "protocol", None),
+    (re.compile(r"^(libstrongswan|libcharon)"), "IPsec/IKEv2", "IPsec", "protocol", None),
+    (re.compile(r"^(libcrypto|libmbedcrypto|libmbedx509|libsodium|libgcrypt|libnettle|libssh)"), "Crypto-Library", "Library", "other", None),
 ]
 
 
@@ -146,31 +159,49 @@ def _symcount(d):
     return 0
 
 
-def elf_symbols(path):
-    """Crypto function names in the dynamic symbol table: (asset, family, prim, qvuln, file offset of the name, symbol, defined|imported)."""
-    out, d = [], elf_dynamic(path)
-    if not d or 5 not in d["tags"] or 6 not in d["tags"]:
-        return out
-    data, le, off, t = d["data"], d["le"], d["off"], d["tags"]
-    st, sy = off(t[5]), off(t[6])
-    if st is None or sy is None:
-        return out
-    ent = 24 if d["is64"] else 16
-    seen = set()
-    for i in range(min(_symcount(d), 20000)):
-        o = sy + i * ent
-        if o + ent > len(data):
+def _match_sym(name, off_val, how, seen, out):
+    if not name or name in seen:
+        return
+    for rx, asset, fam, prim, qv in SYMRULES:
+        if rx.search(name):
+            seen.add(name)
+            out.append((asset, fam, prim, qv, off_val, name, how))
             break
-        nm = _u(data, o, 4, le)
-        shndx = _u(data, o + (6 if d["is64"] else 14), 2, le)
-        name = _cstr(data, st + nm) if nm else ""
-        if not name or name in seen:
-            continue
-        for rx, asset, fam, prim, qv in SYMRULES:
-            if rx.search(name):
-                seen.add(name)
-                out.append((asset, fam, prim, qv, st + nm, name, "imported" if shndx == 0 else "defined"))
-                break
+
+
+def elf_symbols(path):
+    """Crypto function names in .dynsym (via PT_DYNAMIC) or .symtab (e.g. kernel .ko modules)."""
+    out, seen, d = [], set(), elf_dynamic(path)
+    if d and 5 in d["tags"] and 6 in d["tags"]:
+        data, le, off, t = d["data"], d["le"], d["off"], d["tags"]
+        st, sy = off(t[5]), off(t[6])
+        if st is not None and sy is not None:
+            ent = 24 if d["is64"] else 16
+            for i in range(min(_symcount(d), 20000)):
+                o = sy + i * ent
+                if o + ent > len(data):
+                    break
+                nm = _u(data, o, 4, le)
+                shndx = _u(data, o + (6 if d["is64"] else 14), 2, le)
+                name = _cstr(data, st + nm) if nm else ""
+                _match_sym(name, st + nm, "imported" if shndx == 0 else "defined", seen, out)
+            return out
+    try:
+        from elftools.elf.elffile import ELFFile
+        with open(path, "rb") as fh:
+            e = ELFFile(fh)
+            st = e.get_section_by_name(".symtab")
+            if st is None:
+                return out
+            strsec = e.get_section(st["sh_link"])
+            str_off = strsec["sh_offset"]
+            for sym in st.iter_symbols():
+                if not sym.name:
+                    continue
+                how = "imported" if sym["st_shndx"] == "SHN_UNDEF" else "defined"
+                _match_sym(sym.name, str_off + sym["st_name"], how, seen, out)
+    except Exception:
+        pass
     return out
 
 
@@ -215,40 +246,64 @@ def canon(obj):
     return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
 
 
+NON_CRYPTO_KMODS = {"crc32c_generic.ko", "crypto_null.ko"}
+
+
 def scan(path):
     data = open(path, "rb").read()
     fhash = hashlib.sha256(data).hexdigest()
+    base = os.path.basename(path)
     findings = {}  # name -> dict
     def add(name, fam, prim, qv, off, kind, pat_hex, note):
-        f = findings.setdefault(name, dict(family=fam, primitive=prim, qvuln=qv, ev=[]))
+        f = findings.setdefault(name, dict(family=fam, primitive=prim, qvuln=qv, ev=[], kinds=set(), syms=set()))
         f["n"] = f.get("n", 0) + 1
+        f["kinds"].add(kind)
         if kind == "symbol":
             f["imp" if " imported " in note else "def"] = f.get("imp" if " imported " in note else "def", 0) + 1
+            f["syms"].add(note.split()[-1])
         if len(f["ev"]) < 8:
             f["ev"].append(dict(offset=off, kind=kind, pattern=pat_hex, note=note))
-    for name, fam, prim, qv, pat, note in SIGS:
-        for off in find_all(data, pat, 3):
-            add(name, fam, prim, qv, off, "bytes", pat.hex(), note)
-    for name, fam, prim, qv, rx in STRS:
-        n = 0
-        for m in re.finditer(rx, data):
-            add(name, fam, prim, qv, m.start(), "ascii", m.group(0).hex(), "string " + m.group(0).decode("ascii", "replace")[:40])
-            n += 1
-            if n >= 3:
-                break
+    if base not in NON_CRYPTO_KMODS:
+        for name, fam, prim, qv, pat, note in SIGS:
+            for off in find_all(data, pat, 3):
+                add(name, fam, prim, qv, off, "bytes", pat.hex(), note)
+        for name, fam, prim, qv, rx in STRS:
+            n = 0
+            for m in re.finditer(rx, data):
+                add(name, fam, prim, qv, m.start(), "ascii", m.group(0).hex(), "string " + m.group(0).decode("ascii", "replace")[:40])
+                n += 1
+                if n >= 3:
+                    break
+        for name, fam, prim, qv, off, sym, how in elf_symbols(path):
+            add(name, fam, prim, qv, off, "symbol", sym.encode().hex(), "dynsym " + how + " " + sym)
     libs = {}
     for m in LIBS.finditer(data):
         libs.setdefault(m.group(0).decode(), (m.start(), m.group(0)))
-    for name, fam, prim, qv, off, sym, how in elf_symbols(path):
-        add(name, fam, prim, qv, off, "symbol", sym.encode().hex(), "dynsym " + how + " " + sym)
     for need, off in elf_needed(path):
         libs.setdefault("needs " + need, (off, need.encode()))
+        if base not in NON_CRYPTO_KMODS:
+            for rx, asset, fam, prim, qv in NEEDED_RULES:
+                if rx.search(need):
+                    add(asset, fam, prim, qv, off, "dt_needed", need.encode().hex(), "DT_NEEDED " + need)
+                    break
     secs, stripped = elf_info(path)
     for f in findings.values():
         for e in f["ev"]:
             e["section"] = section_of(secs, e["offset"])
     comps = []
     for name, f in sorted(findings.items()):
+        origin = "enthält" if any(k != "dt_needed" for k in f["kinds"]) else "nutzt"
+        props = [
+            {"name": "cbomscan:quantum-vulnerable", "value": "unknown" if f["qvuln"] is None else str(f["qvuln"]).lower()},
+            {"name": "cbomscan:family", "value": f["family"]},
+            {"name": "cbomscan:origin", "value": origin},
+            {"name": "cbomscan:matches-total", "value": str(f.get("n", 0))},
+            {"name": "cbomscan:evidence-listed", "value": str(len(f["ev"]))},
+            {"name": "cbomscan:symbols-imported", "value": str(f.get("imp", 0))},
+            {"name": "cbomscan:symbols-defined", "value": str(f.get("def", 0))},
+        ]
+        if name == "MD5" and f["syms"] and f["syms"] <= {"md5_begin", "md5_hash", "md5_end"} and f["kinds"] == {"symbol"}:
+            props.append({"name": "cbomscan:note", "value": "Prüfsumme, nicht sicherheitsrelevant genutzt"})
         comps.append({
             "type": "cryptographic-asset",
             "bom-ref": "crypto/" + name.replace("/", "-"),
@@ -257,28 +312,23 @@ def scan(path):
                 "assetType": "algorithm",
                 "algorithmProperties": {"primitive": f["primitive"]},
             }),
-            "properties": [{"name": "cbomscan:quantum-vulnerable", "value": "unknown" if f["qvuln"] is None else str(f["qvuln"]).lower()},
-                           {"name": "cbomscan:family", "value": f["family"]},
-                           {"name": "cbomscan:matches-total", "value": str(f.get("n", 0))},
-                           {"name": "cbomscan:evidence-listed", "value": str(len(f["ev"]))},
-                           {"name": "cbomscan:symbols-imported", "value": str(f.get("imp", 0))},
-                           {"name": "cbomscan:symbols-defined", "value": str(f.get("def", 0))}],
+            "properties": props,
             "evidence": {"occurrences": [
-                {"location": os.path.basename(path), "offset": e["offset"],
+                {"location": base, "offset": e["offset"],
                  "additionalContext": json.dumps({"kind": e["kind"], "pattern_hex": e["pattern"], "note": e["note"], "elf_section": e["section"]})}
                 for e in f["ev"]]},
         })
     for lib, (off, raw) in libs.items():
         comps.append({"type": "library", "name": lib, "bom-ref": "lib/" + lib.replace(" ", "-"),
-                      "evidence": {"occurrences": [{"location": os.path.basename(path), "offset": off,
+                      "evidence": {"occurrences": [{"location": base, "offset": off,
                                    "additionalContext": json.dumps({"kind": "ascii", "pattern_hex": raw.hex(), "note": "library string or DT_NEEDED"})}]}})
     bom = {
         "bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
         "serialNumber": "urn:uuid:" + str(uuid.uuid4()),
         "metadata": {"timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                     "tools": {"components": [{"type": "application", "name": "cbomscan", "version": "0.5"}]},
+                     "tools": {"components": [{"type": "application", "name": "cbomscan", "version": "0.7"}]},
                      "properties": [{"name": "cbomscan:elf-stripped", "value": str(stripped).lower()}],
-                     "component": {"type": "file", "name": os.path.basename(path), "bom-ref": "target",
+                     "component": {"type": "file", "name": base, "bom-ref": "target",
                                    "hashes": [{"alg": "SHA-256", "content": fhash}]}},
         "components": comps,
     }
@@ -307,10 +357,13 @@ def write_signed_cbom(bom, out_path, key_path):
                   fh, indent=1)
 
 
+def _prop(c, key, default=""):
+    return next((p["value"] for p in c.get("properties", []) if p["name"] == key), default)
+
+
 def _cbom_summary(bom):
     assets = [c for c in bom["components"] if c["type"] == "cryptographic-asset"]
-    vuln = [c["name"] for c in assets
-            if any(p["name"] == "cbomscan:quantum-vulnerable" and p["value"] == "true" for p in c["properties"])]
+    vuln = [c["name"] for c in assets if _prop(c, "cbomscan:quantum-vulnerable") == "true"]
     needs = [c["name"][6:] for c in bom["components"] if c["type"] == "library" and c["name"].startswith("needs ")]
     return assets, vuln, needs
 
@@ -322,24 +375,64 @@ def cmd_scan(a):
     print(f"{a.file}: {len(assets)} crypto assets, quantum-vulnerable: {', '.join(vuln) or 'none found'}")
 
 
+def _non_colliding_files(img_path, off):
+    """List regular files from SquashFS (`unsquashfs -ll`) and return (keep, skipped_dups)."""
+    r = subprocess.run(["unsquashfs", "-ll", "-o", str(off), img_path], capture_output=True, text=True)
+    seen, keep, dups = set(), [], []
+    for line in r.stdout.splitlines():
+        if not line.startswith("-"):
+            continue
+        idx = line.find("squashfs-root/")
+        if idx < 0:
+            continue
+        rel = line[idx + len("squashfs-root/"):]
+        low = rel.lower()
+        if low in seen:
+            dups.append(rel)
+        else:
+            seen.add(low)
+            keep.append(rel)
+    return keep, dups
+
+
 def _unsquashfs(img_path, dest_dir):
-    """Find SquashFS magic in img_path and unpack it with unsquashfs."""
+    """Find SquashFS magic in img_path and unpack it with unsquashfs. Returns (ok, warnings)."""
     with open(img_path, "rb") as fh:
         data = fh.read()
     off = data.find(b"hsqs")
     if off < 0:
-        return False
+        return False, []
     if shutil.which("unsquashfs") is None:
         raise RuntimeError("unsquashfs not found in PATH")
-    subprocess.run(["unsquashfs", "-q", "-o", str(off), "-d", dest_dir, img_path],
-                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return os.path.isdir(dest_dir) and any(True for _ in os.walk(dest_dir))
+    warnings = []
+    r = subprocess.run(["unsquashfs", "-q", "-o", str(off), "-d", dest_dir, img_path],
+                       capture_output=True, text=True)
+    if r.returncode != 0 and "already exists" in (r.stderr or ""):
+        keep, dups = _non_colliding_files(img_path, off)
+        if keep:
+            shutil.rmtree(dest_dir, ignore_errors=True)
+            with tempfile.NamedTemporaryFile("w", delete=False) as ef:
+                ef.write("\n".join(keep) + "\n")
+                ef_path = ef.name
+            try:
+                r = subprocess.run(["unsquashfs", "-q", "-o", str(off), "-d", dest_dir, "-ef", ef_path, img_path],
+                                   capture_output=True, text=True)
+            finally:
+                os.unlink(ef_path)
+            if dups:
+                warnings.append(f"case-insensitive filesystem: skipped {len(dups)} colliding path(s) ({', '.join(dups[:5])})")
+    if r.returncode != 0:
+        err_lines = [ln.strip() for ln in (r.stderr or "").splitlines() if ln.strip()]
+        reason = "; ".join(err_lines[-2:]) if err_lines else f"exit code {r.returncode}"
+        warnings.append(f"unsquashfs exited with code {r.returncode}: {reason}")
+    ok = os.path.isdir(dest_dir) and any(True for _ in os.walk(dest_dir))
+    return ok, warnings
 
 
 def _extract_image(target, tmpdir):
-    """Return directory to scan: target itself if a dir, or unpacked firmware root inside tmpdir."""
+    """Return (directory_to_scan, warnings)."""
     if os.path.isdir(target):
-        return target
+        return target, []
     fs_dir = os.path.join(tmpdir, "fs")
     if tarfile.is_tarfile(target):
         tar_dir = os.path.join(tmpdir, "tar")
@@ -358,12 +451,14 @@ def _extract_image(target, tmpdir):
         for root_dir, _, files in os.walk(tar_dir):
             if "root" in files:
                 cand = os.path.join(root_dir, "root")
-                if _unsquashfs(cand, fs_dir):
-                    return fs_dir
-        return tar_dir
-    if _unsquashfs(target, fs_dir):
-        return fs_dir
-    raise RuntimeError(f"cannot unpack firmware image: {target}")
+                ok, warns = _unsquashfs(cand, fs_dir)
+                if ok:
+                    return fs_dir, warns
+        return tar_dir, []
+    ok, warns = _unsquashfs(target, fs_dir)
+    if ok:
+        return fs_dir, warns
+    raise RuntimeError(f"cannot unpack firmware image: {target}" + (f" ({'; '.join(warns)})" if warns else ""))
 
 
 def iter_elf_files(root_dir):
@@ -388,10 +483,13 @@ def cmd_scan_image(a):
     cbom_dir = os.path.join(a.o, "cboms")
     os.makedirs(cbom_dir, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmpdir:
-        scan_root = _extract_image(a.target, tmpdir)
+        scan_root, unpack_warnings = _extract_image(a.target, tmpdir)
+        for w in unpack_warnings:
+            print(f"WARNING: image partially unpacked ({w})", file=sys.stderr)
         elfs = iter_elf_files(scan_root)
         rows = []
-        alg_counts = {}
+        contains_counts = {}
+        uses_counts = {}
         qvuln_counts = {}
         for rel, full in elfs:
             bom = scan(full)
@@ -399,43 +497,56 @@ def cmd_scan_image(a):
             cbom_path = os.path.join(cbom_dir, safe_name)
             write_signed_cbom(bom, cbom_path, a.key)
             assets, vuln, needs = _cbom_summary(bom)
-            for c in assets:
-                alg_counts[c["name"]] = alg_counts.get(c["name"], 0) + 1
+            contains = [c["name"] for c in assets if _prop(c, "cbomscan:origin") == "enthält"]
+            uses = [c["name"] for c in assets if _prop(c, "cbomscan:origin") == "nutzt"]
+            notes = [f"{c['name']}: {_prop(c, 'cbomscan:note')}" for c in assets if _prop(c, "cbomscan:note")]
+            for name in contains:
+                contains_counts[name] = contains_counts.get(name, 0) + 1
+            for name in uses:
+                uses_counts[name] = uses_counts.get(name, 0) + 1
             for q in vuln:
                 qvuln_counts[q] = qvuln_counts.get(q, 0) + 1
             rows.append({
                 "file": rel,
                 "crypto_assets": len(assets),
+                "contains": "; ".join(contains),
+                "uses": "; ".join(uses),
                 "algorithms": "; ".join(c["name"] for c in assets),
                 "quantum_vulnerable_count": len(vuln),
                 "quantum_vulnerable": "; ".join(vuln),
+                "notes": "; ".join(notes),
                 "needs": "; ".join(needs),
                 "cbom_file": os.path.join("cboms", safe_name),
             })
     csv_path = os.path.join(a.o, "summary.csv")
     with open(csv_path, "w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=["file", "crypto_assets", "algorithms", "quantum_vulnerable_count", "quantum_vulnerable", "needs", "cbom_file"])
+        w = csv.DictWriter(fh, fieldnames=["file", "crypto_assets", "contains", "uses", "algorithms", "quantum_vulnerable_count", "quantum_vulnerable", "notes", "needs", "cbom_file"])
         w.writeheader()
         w.writerows(rows)
     md_path = os.path.join(a.o, "summary.md")
     target_name = os.path.basename(os.path.abspath(a.target))
-    lines = [
-        f"# cbomscan image summary: `{target_name}`",
-        "",
+    n_contains = sum(1 for r in rows if r["contains"])
+    n_uses_only = sum(1 for r in rows if not r["contains"] and r["uses"])
+    lines = [f"# cbomscan image summary: `{target_name}`", ""]
+    if unpack_warnings:
+        lines.append("> **WARNING: Image only partially unpacked:** " + " | ".join(unpack_warnings))
+        lines.append("")
+    lines += [
         f"- ELF files scanned: **{len(elfs)}**",
-        f"- ELF files with crypto findings: **{sum(1 for r in rows if r['crypto_assets'] > 0)}**",
-        f"- Algorithm counts (files): {', '.join(f'{k}: {v}' for k, v in sorted(alg_counts.items())) or 'none'}",
+        f"- ELF files with crypto findings: **{sum(1 for r in rows if r['crypto_assets'] > 0)}** (enthält selbst: **{n_contains}**, nutzt nur über DT_NEEDED: **{n_uses_only}**)",
+        f"- Algorithm counts (enthält / selbst im Programm): {', '.join(f'{k}: {v}' for k, v in sorted(contains_counts.items())) or 'none'}",
+        f"- Algorithm counts (nutzt / nur über DT_NEEDED): {', '.join(f'{k}: {v}' for k, v in sorted(uses_counts.items())) or 'none'}",
         f"- Quantum-vulnerable counts (files): {', '.join(f'{k}: {v}' for k, v in sorted(qvuln_counts.items())) or 'none'}",
         "",
-        "| File | Crypto assets | Algorithms | Quantum-vulnerable | Needs |",
-        "|---|---|---|---|---|",
+        "| File | Crypto assets | Enthält | Nutzt (DT_NEEDED) | Quantum-vulnerable | Hinweise | Needs |",
+        "|---|---|---|---|---|---|---|",
     ]
     for r in rows:
         if r["crypto_assets"] > 0 or r["needs"]:
-            lines.append(f"| `{r['file']}` | {r['crypto_assets']} | {r['algorithms'] or '–'} | {r['quantum_vulnerable'] or '–'} | {r['needs'] or '–'} |")
+            lines.append(f"| `{r['file']}` | {r['crypto_assets']} | {r['contains'] or '–'} | {r['uses'] or '–'} | {r['quantum_vulnerable'] or '–'} | {r['notes'] or '–'} | {r['needs'] or '–'} |")
     with open(md_path, "w") as fh:
         fh.write("\n".join(lines) + "\n")
-    print(f"{target_name}: {len(elfs)} ELF files, {sum(1 for r in rows if r['crypto_assets'] > 0)} with crypto, summary in {a.o}")
+    print(f"{target_name}: {len(elfs)} ELF files, {sum(1 for r in rows if r['crypto_assets'] > 0)} with crypto (enthält: {n_contains}, nur nutzt: {n_uses_only}), summary in {a.o}")
 
 
 def cmd_verify(a):

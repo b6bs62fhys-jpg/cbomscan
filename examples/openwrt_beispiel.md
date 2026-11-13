@@ -41,3 +41,10 @@ signature: OK
 target hash: OK
 evidence: 72/72 re-checked against the bytes
 ```
+
+## Grenzen
+
+- **Entpacken:** `scan-image` entpackt nur SquashFS-Dateisysteme (`unsquashfs`). FIT-, UBI- und proprietäre Firmware-Container werden nicht entpackt.
+- **Dateisysteme ohne Groß-/Kleinschreibungs-Unterscheidung:** Auf Dateisystemen ohne Unterscheidung von Groß- und Kleinschreibung (z. B. macOS) können bei Namenskollisionen einzelne Dateien übersprungen werden (mit Warnung).
+- **Erkennungsmethode:** Die Erkennung basiert auf Konstanten, Symbolen und Bibliotheksabhängigkeiten (`DT_NEEDED`). Es findet keine Disassemblierung statt; statisch gelinkte oder vollständig gestrippte Programme können fehlen.
+- **„nutzt“ vs. „enthält“:** Die Kennzeichnung „nutzt“ weist nur auf eine `DT_NEEDED`-Abhängigkeit hin und bedeutet keinen eigenen Krypto-Code im Programm selbst („enthält“ steht für direkt in der Datei erkannte Konstanten oder Symbole).
