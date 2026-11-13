@@ -23,6 +23,8 @@ Scan von `usr/lib/libmbedcrypto.so.2.28.9` aus `openwrt-23.05.5-ath79-generic-tp
 | `SHA-256` | nein (`false`) | 8 | 334812 |
 | `SHA-512` | nein (`false`) | 8 | 335072 |
 
+Zusammensetzung der **72** geprüften Fundstellen: **70** Belege aus den 9 Krypto-Assets (`8 + 6 + 8 + 8 + 8 + 8 + 8 + 8 + 8`, jeweils auf maximal 8 Belege pro Asset begrenzt) plus **2** Belege für die `DT_NEEDED`-Abhängigkeiten (`libgcc_s.so.1` und `libc.so`, je 1 Beleg) = **72** (`70 + 2`).
+
 ## Nachprüfen mit `cbomscan verify`
 
 Nach dem Entpacken von `openwrt-23.05.5-ath79-generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin` (z. B. mit `unsquashfs`):
@@ -32,7 +34,7 @@ python cbomscan.py verify examples/archer_c7_libmbedcrypto.cbom.json \
   --target <pfad-zur-entpackten-firmware>/usr/lib/libmbedcrypto.so.2.28.9
 ```
 
-Erwartete Ausgabe:
+Ausgabe eines echten Laufs (cbomscan v0.5, 13.11.2026):
 
 ```text
 signature: OK
