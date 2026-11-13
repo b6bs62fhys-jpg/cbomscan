@@ -1,0 +1,203 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "version": 1,
+ "serialNumber": "urn:uuid:1cff1505-5ec3-4174-83c8-bd940404ad1e",
+ "metadata": {
+  "timestamp": "2026-11-13T15:30:39+00:00",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "cbomscan",
+     "version": "0.5"
+    }
+   ]
+  },
+  "properties": [
+   {
+    "name": "cbomscan:elf-stripped",
+    "value": "true"
+   }
+  ],
+  "component": {
+   "type": "file",
+   "name": "dropbear",
+   "bom-ref": "target",
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "c6a01db9c76ebac187b51082c16d3a995b67bf79ab0a6e0823e1255871c6ee88"
+    }
+   ]
+  }
+ },
+ "components": [
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/ChaCha20",
+   "name": "ChaCha20",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "stream-cipher"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "ChaCha"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "dropbear",
+      "offset": 168762,
+      "additionalContext": "{\"kind\": \"bytes\", \"pattern_hex\": \"657870616e642033322d62797465206b\", \"note\": \"sigma constant\", \"elf_section\": \"segment:LOAD:R--\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/SHA-256",
+   "name": "SHA-256",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "SHA-2"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "dropbear",
+      "offset": 172352,
+      "additionalContext": "{\"kind\": \"bytes\", \"pattern_hex\": \"982f8a4291443771\", \"note\": \"round constants K[0..1] LE\", \"elf_section\": \"segment:LOAD:R--\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/SHA-512",
+   "name": "SHA-512",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "SHA-2"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "dropbear",
+      "offset": 171712,
+      "additionalContext": "{\"kind\": \"bytes\", \"pattern_hex\": \"22ae28d7982f8a42\", \"note\": \"round constants K[0] LE\", \"elf_section\": \"segment:LOAD:R--\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libgcc_s.so.1",
+   "bom-ref": "lib/needs-libgcc_s.so.1",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "dropbear",
+      "offset": 7209,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626763635f732e736f2e31\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libc.so",
+   "bom-ref": "lib/needs-libc.so",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "dropbear",
+      "offset": 7223,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c6962632e736f\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  }
+ ]
+}

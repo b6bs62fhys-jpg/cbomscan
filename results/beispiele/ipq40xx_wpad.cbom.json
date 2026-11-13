@@ -1,0 +1,355 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "version": 1,
+ "serialNumber": "urn:uuid:47094b5b-4c04-4155-b1ff-b1932ea2cad4",
+ "metadata": {
+  "timestamp": "2026-11-13T15:30:21+00:00",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "cbomscan",
+     "version": "0.5"
+    }
+   ]
+  },
+  "properties": [
+   {
+    "name": "cbomscan:elf-stripped",
+    "value": "true"
+   }
+  ],
+  "component": {
+   "type": "file",
+   "name": "wpad",
+   "bom-ref": "target",
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "80f1713ab5c11dd7d7e54f3d32e599dcd1533701846544995c6f1c723cda286a"
+    }
+   ]
+  }
+ },
+ "components": [
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/AES",
+   "name": "AES",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "block-cipher"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "AES"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "4"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "4"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "4"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 10843,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f63727970745f637472\", \"note\": \"dynsym imported mbedtls_aes_crypt_ctr\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 10803,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f696e6974\", \"note\": \"dynsym imported mbedtls_aes_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 10820,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f7365746b65795f656e63\", \"note\": \"dynsym imported mbedtls_aes_setkey_enc\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 10865,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f66726565\", \"note\": \"dynsym imported mbedtls_aes_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/ECDSA-ECDH",
+   "name": "ECDSA/ECDH",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "EC"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "6"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "6"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "6"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 11828,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f726561645f7075626c6963\", \"note\": \"dynsym imported mbedtls_ecdh_read_public\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 11310,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f66726565\", \"note\": \"dynsym imported mbedtls_ecdh_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 11268,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f7365747570\", \"note\": \"dynsym imported mbedtls_ecdh_setup\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 11853,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f63616c635f736563726574\", \"note\": \"dynsym imported mbedtls_ecdh_calc_secret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 11328,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f6765745f706172616d73\", \"note\": \"dynsym imported mbedtls_ecdh_get_params\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "wpad",
+      "offset": 11204,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f696e6974\", \"note\": \"dynsym imported mbedtls_ecdh_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/RSA",
+   "name": "RSA",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "RSA"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "1"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "0"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 8135,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f7365745f70616464696e67\", \"note\": \"dynsym imported mbedtls_rsa_set_padding\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libmbedcrypto.so.7",
+   "bom-ref": "lib/needs-libmbedcrypto.so.7",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12067,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626d62656463727970746f2e736f2e37\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libmbedx509.so.1",
+   "bom-ref": "lib/needs-libmbedx509.so.1",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12086,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626d626564783530392e736f2e31\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libmbedtls.so.14",
+   "bom-ref": "lib/needs-libmbedtls.so.14",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12103,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626d626564746c732e736f2e3134\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libubox.so.20230523",
+   "bom-ref": "lib/needs-libubox.so.20230523",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12120,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c696275626f782e736f2e3230323330353233\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libubus.so.20230605",
+   "bom-ref": "lib/needs-libubus.so.20230605",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12140,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c6962756275732e736f2e3230323330363035\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libblobmsg_json.so.20230523",
+   "bom-ref": "lib/needs-libblobmsg_json.so.20230523",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12160,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c6962626c6f626d73675f6a736f6e2e736f2e3230323330353233\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libucode.so.20230711",
+   "bom-ref": "lib/needs-libucode.so.20230711",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12188,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c696275636f64652e736f2e3230323330373131\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libnl-tiny.so.1",
+   "bom-ref": "lib/needs-libnl-tiny.so.1",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12209,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626e6c2d74696e792e736f2e31\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libgcc_s.so.1",
+   "bom-ref": "lib/needs-libgcc_s.so.1",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12225,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626763635f732e736f2e31\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libc.so",
+   "bom-ref": "lib/needs-libc.so",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "wpad",
+      "offset": 12239,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c6962632e736f\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  }
+ ]
+}

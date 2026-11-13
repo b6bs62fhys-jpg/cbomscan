@@ -2,10 +2,11 @@
 """cbomscan: find cryptography in binaries/firmware, emit a signed CycloneDX 1.6 CBOM
 whose every finding carries re-checkable evidence (file hash, byte offset, pattern bytes).
 
-  cbomscan.py scan   <file> -o out.cbom.json [--key key.pem]
-  cbomscan.py verify out.cbom.json --target <file>
+  cbomscan.py scan       <file> -o out.cbom.json [--key key.pem]
+  cbomscan.py scan-image <fw_or_dir> -o outdir/ [--key key.pem]
+  cbomscan.py verify     out.cbom.json --target <file>
 """
-import argparse, base64, hashlib, json, os, re, sys, uuid
+import argparse, base64, csv, hashlib, json, os, re, shutil, subprocess, sys, tarfile, tempfile, uuid
 from datetime import datetime, timezone
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives import serialization
@@ -292,19 +293,149 @@ def load_key(p):
     return k
 
 
-def cmd_scan(a):
-    bom = scan(a.file)
-    json.dump(bom, open(a.o, "w"), indent=1)
-    k = load_key(a.key)
+def write_signed_cbom(bom, out_path, key_path):
+    """Write a CycloneDX CBOM and its detached Ed25519 signature."""
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    with open(out_path, "w") as fh:
+        json.dump(bom, fh, indent=1)
+    k = load_key(key_path)
     pub = k.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
     sig = k.sign(canon(bom))
-    json.dump({"alg": "Ed25519", "publicKey": base64.b64encode(pub).decode(),
-               "signature": base64.b64encode(sig).decode(), "signs": "canonical JSON of the CBOM"},
-              open(a.o + ".sig", "w"), indent=1)
-    vuln = [c["name"] for c in bom["components"] if c["type"] == "cryptographic-asset"
-            and any(p["name"] == "cbomscan:quantum-vulnerable" and p["value"] == "true" for p in c["properties"])]
-    n = sum(1 for c in bom["components"] if c["type"] == "cryptographic-asset")
-    print(f"{a.file}: {n} crypto assets, quantum-vulnerable: {', '.join(vuln) or 'none found'}")
+    with open(out_path + ".sig", "w") as fh:
+        json.dump({"alg": "Ed25519", "publicKey": base64.b64encode(pub).decode(),
+                   "signature": base64.b64encode(sig).decode(), "signs": "canonical JSON of the CBOM"},
+                  fh, indent=1)
+
+
+def _cbom_summary(bom):
+    assets = [c for c in bom["components"] if c["type"] == "cryptographic-asset"]
+    vuln = [c["name"] for c in assets
+            if any(p["name"] == "cbomscan:quantum-vulnerable" and p["value"] == "true" for p in c["properties"])]
+    needs = [c["name"][6:] for c in bom["components"] if c["type"] == "library" and c["name"].startswith("needs ")]
+    return assets, vuln, needs
+
+
+def cmd_scan(a):
+    bom = scan(a.file)
+    write_signed_cbom(bom, a.o, a.key)
+    assets, vuln, _ = _cbom_summary(bom)
+    print(f"{a.file}: {len(assets)} crypto assets, quantum-vulnerable: {', '.join(vuln) or 'none found'}")
+
+
+def _unsquashfs(img_path, dest_dir):
+    """Find SquashFS magic in img_path and unpack it with unsquashfs."""
+    with open(img_path, "rb") as fh:
+        data = fh.read()
+    off = data.find(b"hsqs")
+    if off < 0:
+        return False
+    if shutil.which("unsquashfs") is None:
+        raise RuntimeError("unsquashfs not found in PATH")
+    subprocess.run(["unsquashfs", "-q", "-o", str(off), "-d", dest_dir, img_path],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return os.path.isdir(dest_dir) and any(True for _ in os.walk(dest_dir))
+
+
+def _extract_image(target, tmpdir):
+    """Return directory to scan: target itself if a dir, or unpacked firmware root inside tmpdir."""
+    if os.path.isdir(target):
+        return target
+    fs_dir = os.path.join(tmpdir, "fs")
+    if tarfile.is_tarfile(target):
+        tar_dir = os.path.join(tmpdir, "tar")
+        os.makedirs(tar_dir, exist_ok=True)
+        with tarfile.open(target, "r:*") as tf:
+            for m in tf.getmembers():
+                if not m.isfile():
+                    continue
+                rel = os.path.normpath(m.name).lstrip("/")
+                if rel.startswith("..") or os.path.isabs(rel):
+                    continue
+                out_p = os.path.join(tar_dir, rel)
+                os.makedirs(os.path.dirname(out_p), exist_ok=True)
+                with tf.extractfile(m) as src, open(out_p, "wb") as dst:
+                    shutil.copyfileobj(src, dst)
+        for root_dir, _, files in os.walk(tar_dir):
+            if "root" in files:
+                cand = os.path.join(root_dir, "root")
+                if _unsquashfs(cand, fs_dir):
+                    return fs_dir
+        return tar_dir
+    if _unsquashfs(target, fs_dir):
+        return fs_dir
+    raise RuntimeError(f"cannot unpack firmware image: {target}")
+
+
+def iter_elf_files(root_dir):
+    """Yield (relpath, fullpath) for all non-symlink ELF files under root_dir."""
+    paths = []
+    for r, _, files in os.walk(root_dir, followlinks=False):
+        for fn in files:
+            p = os.path.join(r, fn)
+            if os.path.islink(p) or not os.path.isfile(p):
+                continue
+            try:
+                with open(p, "rb") as fh:
+                    if fh.read(4) == b"\x7fELF":
+                        paths.append((os.path.relpath(p, root_dir), p))
+            except OSError:
+                continue
+    return sorted(paths)
+
+
+def cmd_scan_image(a):
+    os.makedirs(a.o, exist_ok=True)
+    cbom_dir = os.path.join(a.o, "cboms")
+    os.makedirs(cbom_dir, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        scan_root = _extract_image(a.target, tmpdir)
+        elfs = iter_elf_files(scan_root)
+        rows = []
+        alg_counts = {}
+        qvuln_counts = {}
+        for rel, full in elfs:
+            bom = scan(full)
+            safe_name = rel.replace(os.sep, "__").replace(" ", "_") + ".cbom.json"
+            cbom_path = os.path.join(cbom_dir, safe_name)
+            write_signed_cbom(bom, cbom_path, a.key)
+            assets, vuln, needs = _cbom_summary(bom)
+            for c in assets:
+                alg_counts[c["name"]] = alg_counts.get(c["name"], 0) + 1
+            for q in vuln:
+                qvuln_counts[q] = qvuln_counts.get(q, 0) + 1
+            rows.append({
+                "file": rel,
+                "crypto_assets": len(assets),
+                "algorithms": "; ".join(c["name"] for c in assets),
+                "quantum_vulnerable_count": len(vuln),
+                "quantum_vulnerable": "; ".join(vuln),
+                "needs": "; ".join(needs),
+                "cbom_file": os.path.join("cboms", safe_name),
+            })
+    csv_path = os.path.join(a.o, "summary.csv")
+    with open(csv_path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=["file", "crypto_assets", "algorithms", "quantum_vulnerable_count", "quantum_vulnerable", "needs", "cbom_file"])
+        w.writeheader()
+        w.writerows(rows)
+    md_path = os.path.join(a.o, "summary.md")
+    target_name = os.path.basename(os.path.abspath(a.target))
+    lines = [
+        f"# cbomscan image summary: `{target_name}`",
+        "",
+        f"- ELF files scanned: **{len(elfs)}**",
+        f"- ELF files with crypto findings: **{sum(1 for r in rows if r['crypto_assets'] > 0)}**",
+        f"- Algorithm counts (files): {', '.join(f'{k}: {v}' for k, v in sorted(alg_counts.items())) or 'none'}",
+        f"- Quantum-vulnerable counts (files): {', '.join(f'{k}: {v}' for k, v in sorted(qvuln_counts.items())) or 'none'}",
+        "",
+        "| File | Crypto assets | Algorithms | Quantum-vulnerable | Needs |",
+        "|---|---|---|---|---|",
+    ]
+    for r in rows:
+        if r["crypto_assets"] > 0 or r["needs"]:
+            lines.append(f"| `{r['file']}` | {r['crypto_assets']} | {r['algorithms'] or '–'} | {r['quantum_vulnerable'] or '–'} | {r['needs'] or '–'} |")
+    with open(md_path, "w") as fh:
+        fh.write("\n".join(lines) + "\n")
+    print(f"{target_name}: {len(elfs)} ELF files, {sum(1 for r in rows if r['crypto_assets'] > 0)} with crypto, summary in {a.o}")
 
 
 def cmd_verify(a):
@@ -339,5 +470,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     sp = ap.add_subparsers(dest="c", required=True)
     s = sp.add_parser("scan"); s.add_argument("file"); s.add_argument("-o", required=True); s.add_argument("--key", default="signing.pem"); s.set_defaults(f=cmd_scan)
+    si = sp.add_parser("scan-image"); si.add_argument("target"); si.add_argument("-o", required=True); si.add_argument("--key", default="signing.pem"); si.set_defaults(f=cmd_scan_image)
     v = sp.add_parser("verify"); v.add_argument("cbom"); v.add_argument("--target", required=True); v.set_defaults(f=cmd_verify)
     a = ap.parse_args(); a.f(a)

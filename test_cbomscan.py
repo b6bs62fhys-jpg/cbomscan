@@ -32,3 +32,15 @@ def test_works_without_section_headers():
     names = {x["name"] for x in json.load(open(o))["components"]}
     assert {"AES", "RSA"} <= names and "needs libm.so.6" in names
     assert run("verify", o, "--target", so).returncode == 0
+
+def test_scan_image_dir():
+    d = tempfile.mkdtemp(); sub = os.path.join(d, "usr", "lib"); os.makedirs(sub)
+    elf = os.path.join(sub, "libcrypto.so"); non = os.path.join(sub, "readme.txt"); out = os.path.join(d, "out"); k = os.path.join(d, "k.pem")
+    open(elf, "wb").write(b"\x7fELF" + b"\x00" * 60 + bytes.fromhex("06092a864886f70d010101"))
+    open(non, "wb").write(b"not an elf " + bytes.fromhex("06092a864886f70d010101"))
+    assert run("scan-image", d, "-o", out, "--key", k).returncode == 0
+    assert os.path.exists(os.path.join(out, "summary.csv"))
+    assert os.path.exists(os.path.join(out, "summary.md"))
+    cbom = os.path.join(out, "cboms", "usr__lib__libcrypto.so.cbom.json")
+    assert os.path.exists(cbom) and os.path.exists(cbom + ".sig")
+    assert run("verify", cbom, "--target", elf).returncode == 0

@@ -1,0 +1,784 @@
+{
+ "bomFormat": "CycloneDX",
+ "specVersion": "1.6",
+ "version": 1,
+ "serialNumber": "urn:uuid:77ec7529-809e-49bd-b2f2-8b54a669ed34",
+ "metadata": {
+  "timestamp": "2026-11-13T15:30:18+00:00",
+  "tools": {
+   "components": [
+    {
+     "type": "application",
+     "name": "cbomscan",
+     "version": "0.5"
+    }
+   ]
+  },
+  "properties": [
+   {
+    "name": "cbomscan:elf-stripped",
+    "value": "true"
+   }
+  ],
+  "component": {
+   "type": "file",
+   "name": "libmbedcrypto.so.2.28.9",
+   "bom-ref": "target",
+   "hashes": [
+    {
+     "alg": "SHA-256",
+     "content": "e251f41e13a2ce8e9024cf637f3dc5fbd099fb21aa4932829212dbb4437e47bb"
+    }
+   ]
+  }
+ },
+ "components": [
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/AES",
+   "name": "AES",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "block-cipher"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "AES"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "12"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "12"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17156,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f66726565\", \"note\": \"dynsym defined mbedtls_aes_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17273,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f656e6372797074\", \"note\": \"dynsym defined mbedtls_aes_encrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17421,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f63727970745f636662313238\", \"note\": \"dynsym defined mbedtls_aes_crypt_cfb128\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17221,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f7365746b65795f646563\", \"note\": \"dynsym defined mbedtls_aes_setkey_dec\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22228,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f636d61635f7072665f313238\", \"note\": \"dynsym defined mbedtls_aes_cmac_prf_128\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17446,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f63727970745f63666238\", \"note\": \"dynsym defined mbedtls_aes_crypt_cfb8\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17198,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f7365746b65795f656e63\", \"note\": \"dynsym defined mbedtls_aes_setkey_enc\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 17322,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6165735f64656372797074\", \"note\": \"dynsym defined mbedtls_aes_decrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/ChaCha20",
+   "name": "ChaCha20",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "stream-cipher"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "ChaCha"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "6"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "6"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "6"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 20084,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f6372797074\", \"note\": \"dynsym defined mbedtls_chacha20_crypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 19968,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f696e6974\", \"note\": \"dynsym defined mbedtls_chacha20_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 20060,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f757064617465\", \"note\": \"dynsym defined mbedtls_chacha20_update\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 20036,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f737461727473\", \"note\": \"dynsym defined mbedtls_chacha20_starts\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 20012,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f7365746b6579\", \"note\": \"dynsym defined mbedtls_chacha20_setkey\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 19990,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f63686163686132305f66726565\", \"note\": \"dynsym defined mbedtls_chacha20_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/DH",
+   "name": "DH",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "key-agree"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "DH"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "10"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "10"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22812,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f726561645f706172616d73\", \"note\": \"dynsym defined mbedtls_dhm_read_params\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22906,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f6d616b655f7075626c6963\", \"note\": \"dynsym defined mbedtls_dhm_make_public\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 23051,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f70617273655f64686d66696c65\", \"note\": \"dynsym defined mbedtls_dhm_parse_dhmfile\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22954,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f66726565\", \"note\": \"dynsym defined mbedtls_dhm_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22930,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f63616c635f736563726574\", \"note\": \"dynsym defined mbedtls_dhm_calc_secret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22836,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f6d616b655f706172616d73\", \"note\": \"dynsym defined mbedtls_dhm_make_params\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22882,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f726561645f7075626c6963\", \"note\": \"dynsym defined mbedtls_dhm_read_public\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 22971,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f64686d5f70617273655f64686d\", \"note\": \"dynsym defined mbedtls_dhm_parse_dhm\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/ECDSA-ECDH",
+   "name": "ECDSA/ECDH",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "EC"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "30"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "27"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 319510,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"4543445341\", \"note\": \"string ECDSA\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 331368,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"4543445341\", \"note\": \"string ECDSA\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 331416,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"4543445341\", \"note\": \"string ECDSA\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 23286,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f696e6974\", \"note\": \"dynsym defined mbedtls_ecdh_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 23915,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f65636473615f7369676e\", \"note\": \"dynsym defined mbedtls_ecdsa_sign\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 24005,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f65636473615f77726974655f7369676e61747572655f7265737461727461626c65\", \"note\": \"dynsym defined mbedtls_ecdsa_write_signature_restartable\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 23116,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f656364685f67656e5f7075626c6963\", \"note\": \"dynsym defined mbedtls_ecdh_gen_public\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 23984,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f65636473615f766572696679\", \"note\": \"dynsym defined mbedtls_ecdsa_verify\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/MD5",
+   "name": "MD5",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "MD5"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "13"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "13"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26232,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f7570646174655f726574\", \"note\": \"dynsym defined mbedtls_md5_update_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26624,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f757064617465\", \"note\": \"dynsym defined mbedtls_md5_update\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26604,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f70726f63657373\", \"note\": \"dynsym defined mbedtls_md5_process\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 25938,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f66726565\", \"note\": \"dynsym defined mbedtls_md5_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26135,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f7374617274735f726574\", \"note\": \"dynsym defined mbedtls_md5_starts_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26305,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f66696e6973685f726574\", \"note\": \"dynsym defined mbedtls_md5_finish_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26585,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f737461727473\", \"note\": \"dynsym defined mbedtls_md5_starts\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26072,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f6d64355f696e6974\", \"note\": \"dynsym defined mbedtls_md5_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/RSA",
+   "name": "RSA",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "pke"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "true"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "RSA"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "41"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "38"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 27776,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"7273615f706b6373315f656e6372797074\", \"note\": \"string rsa_pkcs1_encrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 27802,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"7273615f706b6373315f64656372797074\", \"note\": \"string rsa_pkcs1_decrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 27828,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"7273615f706b6373315f7369676e\", \"note\": \"string rsa_pkcs1_sign\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 31038,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f72736165735f6f6165705f656e6372797074\", \"note\": \"dynsym defined mbedtls_rsa_rsaes_oaep_encrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 32716,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f6578706f72745f726177\", \"note\": \"dynsym defined mbedtls_rsa_export_raw\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 27687,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f66726565\", \"note\": \"dynsym defined mbedtls_rsa_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 32654,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f6465647563655f7072696d6573\", \"note\": \"dynsym defined mbedtls_rsa_deduce_primes\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 31092,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7273615f72736165735f6f6165705f64656372797074\", \"note\": \"dynsym defined mbedtls_rsa_rsaes_oaep_decrypt\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/SHA-1",
+   "name": "SHA-1",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "SHA-1"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "13"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "13"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26374,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f726574\", \"note\": \"dynsym defined mbedtls_sha1_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33162,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f66696e697368\", \"note\": \"dynsym defined mbedtls_sha1_finish\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26158,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f7374617274735f726574\", \"note\": \"dynsym defined mbedtls_sha1_starts_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26034,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f696e6974\", \"note\": \"dynsym defined mbedtls_sha1_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33101,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f737461727473\", \"note\": \"dynsym defined mbedtls_sha1_starts\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33121,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f70726f63657373\", \"note\": \"dynsym defined mbedtls_sha1_process\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33142,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f757064617465\", \"note\": \"dynsym defined mbedtls_sha1_update\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26182,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861315f7570646174655f726574\", \"note\": \"dynsym defined mbedtls_sha1_update_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/SHA-256",
+   "name": "SHA-256",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "SHA-2"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "14"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "13"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 334812,
+      "additionalContext": "{\"kind\": \"bytes\", \"pattern_hex\": \"428a2f9871374491\", \"note\": \"round constants K[0..1] BE\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 25056,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f696e6974\", \"note\": \"dynsym defined mbedtls_sha256_init\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33284,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861323536\", \"note\": \"dynsym defined mbedtls_sha256\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33262,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f66696e697368\", \"note\": \"dynsym defined mbedtls_sha256_finish\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 24948,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f726574\", \"note\": \"dynsym defined mbedtls_sha256_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33195,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f737461727473\", \"note\": \"dynsym defined mbedtls_sha256_starts\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33240,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f757064617465\", \"note\": \"dynsym defined mbedtls_sha256_update\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 25203,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613235365f66696e6973685f726574\", \"note\": \"dynsym defined mbedtls_sha256_finish_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "cryptographic-asset",
+   "bom-ref": "crypto/SHA-512",
+   "name": "SHA-512",
+   "cryptoProperties": {
+    "assetType": "algorithm",
+    "algorithmProperties": {
+     "primitive": "hash"
+    }
+   },
+   "properties": [
+    {
+     "name": "cbomscan:quantum-vulnerable",
+     "value": "false"
+    },
+    {
+     "name": "cbomscan:family",
+     "value": "SHA-2"
+    },
+    {
+     "name": "cbomscan:matches-total",
+     "value": "14"
+    },
+    {
+     "name": "cbomscan:evidence-listed",
+     "value": "8"
+    },
+    {
+     "name": "cbomscan:symbols-imported",
+     "value": "0"
+    },
+    {
+     "name": "cbomscan:symbols-defined",
+     "value": "13"
+    }
+   ],
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 335072,
+      "additionalContext": "{\"kind\": \"bytes\", \"pattern_hex\": \"428a2f98d728ae22\", \"note\": \"round constants K[0] BE\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26339,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f726574\", \"note\": \"dynsym defined mbedtls_sha512_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 25974,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f636c6f6e65\", \"note\": \"dynsym defined mbedtls_sha512_clone\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 25918,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f66726565\", \"note\": \"dynsym defined mbedtls_sha512_free\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33388,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f736861353132\", \"note\": \"dynsym defined mbedtls_sha512\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33321,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f70726f63657373\", \"note\": \"dynsym defined mbedtls_sha512_process\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33344,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f757064617465\", \"note\": \"dynsym defined mbedtls_sha512_update\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     },
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 26109,
+      "additionalContext": "{\"kind\": \"symbol\", \"pattern_hex\": \"6d626564746c735f7368613531325f7374617274735f726574\", \"note\": \"dynsym defined mbedtls_sha512_starts_ret\", \"elf_section\": \"segment:LOAD:R-X\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libgcc_s.so.1",
+   "bom-ref": "lib/needs-libgcc_s.so.1",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33557,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c69626763635f732e736f2e31\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  },
+  {
+   "type": "library",
+   "name": "needs libc.so",
+   "bom-ref": "lib/needs-libc.so",
+   "evidence": {
+    "occurrences": [
+     {
+      "location": "libmbedcrypto.so.2.28.9",
+      "offset": 33571,
+      "additionalContext": "{\"kind\": \"ascii\", \"pattern_hex\": \"6c6962632e736f\", \"note\": \"library string or DT_NEEDED\"}"
+     }
+    ]
+   }
+  }
+ ]
+}
